@@ -1,0 +1,20 @@
+{
+    "extends": "airbnb-base",
+    "env": {
+      "node": true
+    },
+    "parserOptions": {
+      "ecmaVersion": 2018
+    },
+    "rules": {
+      "linebreak-style": 0,
+      "no-param-reassign":"off",
+      "no-underscore-dangle": "off",
+      "consistent-return": "off",
+      "no-shadow": "off",
+      "import/no-extraneous-dependencies": ["error", {"devDependencies": ["e2e/**/*.js", "**/*.spec.js"]}],
+      "no-console": ["off", {
+        "allow": ["info", "warn", "error"]
+      }]
+    }
+  }
