@@ -1,12 +1,12 @@
 const { MongoClient } = require('mongodb');
-// const config = require('../config');
+const config = require('../config');
 
-console.log('Variables de entorno DB_URL:', process.env.DB_URL);
+console.log('Variables de entorno DB_URL:', config.dbUrl);
 
 let database;
 module.exports = () => {
   if (!database) {
-    return MongoClient.connect(process.env.DB_URL, { useUnifiedTopology: true })
+    return MongoClient.connect(config.dbUrl, { useUnifiedTopology: true })
       .then((client) => {
         database = client.db('veri');
         console.log('Database connect!');

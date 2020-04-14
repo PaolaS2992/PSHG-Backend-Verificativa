@@ -38,8 +38,6 @@ routes(app, (err) => {
 // E. Middleware - Importar rutas.
 app.use(routes);
 
-app.set('port', process.env.PORT || 3000);
-
-app.listen(app.get('port'), () => {
-  console.log(`App listen port ${app.get('port')}`);
+app.listen(config.port, () => {
+  console.log(`App listen port ${config.port}`);
 });
