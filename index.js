@@ -3,7 +3,7 @@ if (process.env.NODE_ENV !== 'production') {
   // eslint-disable-next-line global-require
   require('dotenv').config();
 }
-
+const cors = require('cors');
 const morgan = require('morgan');
 const express = require('express');
 const config = require('./config');
@@ -17,14 +17,17 @@ const app = express();
 // B. Conexion a la bd.
 database();
 
-// C. Middleware - Permite ver data enviada del navegador por CLI.
+// C. Middleware - Cors - Permite acceso al API de otros dominios.
+app.use(cors());
+
+// D. Middleware - Permite ver data enviada del navegador por CLI.
 app.use(morgan('dev'));
 
-// D. Middleware - Parse application/x-www-form-urlencoded
+// F. Middleware - Parse application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
-// authMiddleware
+// G. authMiddleware
 app.use(authMiddleware(config.secret));
 
 /* // registrar rutas
@@ -35,7 +38,7 @@ routes(app, (err) => {
   });
 }); */
 
-// E. Middleware - Importar rutas.
+// H. Middleware - Importar rutas.
 app.use(routes);
 
 app.listen(config.port, () => {
