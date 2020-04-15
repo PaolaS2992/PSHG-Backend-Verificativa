@@ -99,6 +99,59 @@ router.post('/test', (req, res) => {
 });
 
 // Hackathon Interna - Mostrar respuestas test de todos postulantes.
-router.get('/dashboard', (req, res) => {});
+const getPuntaje = (arrObjPuntaje) => {
+  let suma = 0;
+  arrObjPuntaje.forEach((ele) => {
+    suma += parseInt(ele.puntaje, 10);
+  });
+  return suma;
+};
+
+const getStatus = (puntaje) => {
+  let status = '';
+  // puntaje > 100 ? status = 'Apto' : status = 'No Apto';
+  if (puntaje > 100) {
+    status = 'Apto';
+  } else {
+    status = 'No apto';
+  }
+  return status;
+};
+
+router.get('/dashboard', (req, res) => {
+  return collection('resultados')
+    .then((collectionResultados) => collectionResultados.find().toArray())
+    .then((docsResultado) => {
+      // Calcular el puntaje por examen.
+      const calificacion = docsResultado.map((doc) => {
+        const objResponse = {
+          email: doc.emailPostulante,
+          nombrePrueba: doc.nombrePrueba,
+          tiempoRealizado: doc.tiempoRealizado,
+          totalPuntaje: getPuntaje(doc.resultados),
+        };
+        return objResponse;
+      });
+      res.send(calificacion);
+    });
+});
 
 module.exports = router;
+
+/*
+// TOTAL DE CALIFICACIÓN.
+router.get('/dashboard', (req, res) => {
+  return collection('resultados')
+    .then((collectionResultados) => collectionResultados.find().toArray())
+    .then((docResultado) => {
+      // Calcular el puntaje por examen.
+      const resTest = docResultado.map((resultado) => resultado.resultados);
+      let suma = 0;
+      const puntajeFinal = resTest.map((resultados) => {
+        console.log('soy resultados!!!', resultados);
+        suma = getPuntaje(resultados);
+        return suma;
+      });
+      res.send(puntajeFinal);
+    });
+}); */
