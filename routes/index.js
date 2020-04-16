@@ -88,7 +88,7 @@ router.post('/test', (req, res) => {
     emailPostulante: req.headers.user.email,
     tiempoRealizado: '15 min', // req.body.time
     nombrePrueba: 'Estres laboral', // falta
-    resultados: req.body.resultados,
+    resultados: req.body, // resultados: req.body.resultados,
   };
 
   return collection('resultados')
