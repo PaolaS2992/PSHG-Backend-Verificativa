@@ -136,6 +136,8 @@ router.get('/dashboard', (req, res) => {
     });
 });
 
+// Registro Postulante --> Se asume ingreso de las hora max de rendir examen.
+
 module.exports = router;
 
 /*
