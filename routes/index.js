@@ -46,6 +46,9 @@ router.post('/auth', (req, res, next) => {
       }));
 });
 
+// auth - login - postulante.
+router.post('/auth', (req, res) => {});
+
 // users - createUser.
 router.post('/users', (req, res, next) => {
   const { email, roles = { admin: false } } = req.body;

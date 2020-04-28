@@ -1,4 +1,4 @@
 node_modules/
 coverage/
-.envsendgrid.env
 package-lock.json
+sendgrid.env
