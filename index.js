@@ -7,7 +7,7 @@ const cors = require('cors');
 const morgan = require('morgan');
 const express = require('express');
 const config = require('./config');
-const database = require('./connection/connectDatabase');
+const database = require('./connection/connectDB');
 const routes = require('./routes/index');
 const authMiddleware = require('./middleware/auth');
 

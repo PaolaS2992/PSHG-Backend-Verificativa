@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const collection = require('../connection/collection');
 const config = require('../config');
-const { validateEmail } = require('../utils/utils');
+const functionUtils = require('../utils/utils');
 const functionEmail = require('../lib/libEmail');
 const functionExcel = require('../lib/libExcel');
 
@@ -13,7 +13,7 @@ const functionExcel = require('../lib/libExcel');
 
 const router = Router();
 
-// router.get('/', getUsers);
+// Al iniciar API.
 router.get('/', (req, res) => res.json({ name: 'api-verificativa', version: '1.0.0' }));
 
 // auth - login.
@@ -22,8 +22,10 @@ router.post('/auth', (req, res, next) => {
   if (!email && !password) {
     res.status(400).send({ message: 'Ingresar Email y Password' });
   }
+  let db;
   return collection('users')
-    .then((collectionUsers) => collectionUsers.findOne({ email })
+    .then((collectionUsers) => db = collectionUsers)
+    .then(() => db.findOne({ email })
       .then((user) => {
         if (!user) {
           return res.status(400).send({ message: 'No estas registrado' });
@@ -52,7 +54,7 @@ router.post('/users', (req, res, next) => {
   if (!email && !password) {
     return res.status(400).send({ message: 'Ingresar Email y Password' });
   }
-  if (!(validateEmail(email))) {
+  if (!(functionUtils.validateEmail(email))) {
     return res.status(400).send({ message: 'Formato Email invalido' });
   }
   if (password.length < 4) {
@@ -60,14 +62,16 @@ router.post('/users', (req, res, next) => {
   }
   password = bcrypt.hashSync(password, 10);
 
+  let db;
   return collection('users')
-    .then((collectionUsers) => collectionUsers.findOne({ email })
+    .then((collectionUsers) => db = collectionUsers)
+    .then(() => db.findOne({ email })
       .then((user) => {
-        if (!user) {
+        if (!user){
           return collection('users')
-            .then((collectionUsers) => collectionUsers.createIndex({ email: 1 }, { unique: true }))
-            .then(() => collection('users'))
-            .then((collectionUsers) => collectionUsers.insertOne({ email, password, roles }))
+            .then((collectionUsers) => db = collectionUsers)
+            .then(() => db.createIndex({email:1}, {unique:true}))
+            .then(() => db.insertOne({email, password, roles}))
             .then((newUser) => {
               res.send({
                 _id: newUser.ops[0]._id,
@@ -79,9 +83,32 @@ router.post('/users', (req, res, next) => {
       }));
 });
 
-// Profile
+// profile
 router.get('/profile', (req, res) => {
   res.send(req.headers.user);
+});
+
+// Envio de correos Masivos
+router.post('/masivo', (req, res) => {
+  // TODO - Sanear el Excel (Validar la data segun formato).
+  // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
+  let db;
+  const formatoJson = functionExcel.getExcelJson();
+  collection('postulantes')
+   .then((dbCollection) => db = dbCollection)
+   .then(() => db.insertMany(formatoJson))
+   .then(() => functionEmail.sendMasivoEmail(formatoJson))
+   .then(() => res.send({ message:'Correos enviados!!!' }))
+   .catch(err => console.log(err));
+});
+
+router.get('/masivo', (req, res) => {
+  let db;
+  collection('postulantes')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.find().toArray())
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
 });
 
 // Hackaton Interna - Guardar respuesta de test.
@@ -92,7 +119,7 @@ router.post('/test', (req, res) => {
     nombrePrueba: 'Estres laboral', // falta
     resultados: req.body, // resultados: req.body.resultados,
   };
-
+  
   return collection('resultados')
     .then((collectionResultados) => collectionResultados.insertOne(resTest))
     .then((newTest) => {
@@ -137,32 +164,6 @@ router.get('/dashboard', (req, res) => {
       res.send(calificacion);
     });
 });
-
-// Registro Postulante --> Se asume ingreso de las hora max de rendir examen.
-
-// Envio de correos Masivos
-router.post('/masivo', (req, res) => {
-  // TODO - Sanear el Excel (Validar la data segun formato).
-  // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
-  let db;
-  const formatoJson = functionExcel.getExcelJson();
-  collection('postulante')
-   .then((dbCollection) => db = dbCollection)
-   .then(() => db.insertMany(formatoJson))
-   .then(() => functionEmail.sendMasivoEmail(formatoJson))
-   .then(() => res.send({ message:'Correos enviados!!!' }))
-   .catch(err => console.log(err));
-});
-
-router.get('/masivo', (req, res) => {
-  let db;
-  collection('postulante')
-    .then((dbCollection) => db = dbCollection)
-    .then(() => db.find().toArray())
-    .then((result) => res.send(result))
-    .catch((err) => console.log(err));
-});
-
 
 module.exports = router;
 
