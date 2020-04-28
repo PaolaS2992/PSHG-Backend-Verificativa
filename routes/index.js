@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const collection = require('../connection/collection');
 const config = require('../config');
 const { validateEmail } = require('../utils/utils');
+const functionEmail = require('../lib/libEmail');
+const functionExcel = require('../lib/libExcel');
 
 /* const {
   getUsers,
@@ -137,6 +139,30 @@ router.get('/dashboard', (req, res) => {
 });
 
 // Registro Postulante --> Se asume ingreso de las hora max de rendir examen.
+
+// Envio de correos Masivos
+router.post('/masivo', (req, res) => {
+  // TODO - Sanear el Excel (Validar la data segun formato).
+  // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
+  let db;
+  const formatoJson = functionExcel.getExcelJson();
+  collection('postulante')
+   .then((dbCollection) => db = dbCollection)
+   .then(() => db.insertMany(formatoJson))
+   .then(() => functionEmail.sendMasivoEmail(formatoJson))
+   .then(() => res.send({ message:'Correos enviados!!!' }))
+   .catch(err => console.log(err));
+});
+
+router.get('/masivo', (req, res) => {
+  let db;
+  collection('postulante')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.find().toArray())
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
+});
+
 
 module.exports = router;
 
