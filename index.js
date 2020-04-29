@@ -10,7 +10,6 @@ const config = require('./config');
 const database = require('./connection/connectDB');
 const authMiddleware = require('./middleware/auth');
 
-const routes = require('./routes/index');
 const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
 const candidatesRouter = require('./routes/candidates');
@@ -43,7 +42,6 @@ routes(app, (err) => {
 }); */
 
 // H. Middleware - Importar rutas.
-// app.use(routes);
 app.use(authRouter);
 app.use(usersRouter);
 app.use(candidatesRouter);

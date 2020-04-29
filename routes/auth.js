@@ -36,7 +36,39 @@ router.post('/auth', (req, res, next) => {
         }));
 });
 
-// auth - login - postulante.
-router.post('/authPostulante', (req, res) => {});
+/**
+ * Auth - Login Postulante.
+ * Donde:
+ * email: Correo del candidato.
+ * password: dni.
+ *  */
+router.post('/authPostulante', (req, res) => {
+  const { email, password } = req.body;
+  if (!email && !password) {
+    res.status(400).send({message: 'Ingresar Email y Password'})
+  }
+  let db;
+  return collection('postulantes')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.findOne({email})
+      .then((candidate) => {
+        if (!candidate) {
+          return res.status(400).send({ message: 'No estas registrado' })
+        }
+        if (password == candidate.dni) {
+          const payload = {
+            uid: candidate._id,
+            iss: 'api-verificativa',
+            expiresIn: 60 * 60 * 24,
+          };
+          // Generar Token.
+          const token = jwt.sign(payload, config.secret);
+          res.send({ token });
+        } else {
+          return res.status(400).send({ message: 'Contraseña invalida' });
+        }
+      })
+    )
+});
 
 module.exports = router;
