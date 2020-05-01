@@ -11,7 +11,7 @@ router.post('/massive', (req, res) => {
     // const formatoJson = functionExcel.getExcelJson();
     collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
-      .then(() => db.insertOne(data)) //req.body
+      .then(() => db.insertOne(req.body)) //req.body
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
       .then(() => res.send({ message:'Correos enviados!!!' }))
       .catch(err => console.log(err));
