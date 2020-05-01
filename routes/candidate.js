@@ -6,7 +6,7 @@ const functionEmail = require('../lib/libEmail');
 const router = Router();
 
 // Envio de correos Masivos
-router.post('/masivo', (req, res) => {
+router.post('/masivo-ant', (req, res) => {
   // const { ..., inicioSesion: {esatado: true}} = req;
   // TODO - Sanear el Excel (Validar la data segun formato).
   // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).

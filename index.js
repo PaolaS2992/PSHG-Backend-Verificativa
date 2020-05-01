@@ -12,7 +12,8 @@ const authMiddleware = require('./middleware/auth');
 
 const authRouter = require('./routes/auth');
 const usersRouter = require('./routes/users');
-const candidatesRouter = require('./routes/candidates');
+const candidatesRouter = require('./routes/candidate');
+const requestRouter = require('./routes/request');
 
 // A. Crear el Servidor.
 const app = express();
@@ -45,6 +46,7 @@ routes(app, (err) => {
 app.use(authRouter);
 app.use(usersRouter);
 app.use(candidatesRouter);
+app.use(requestRouter);
 
 app.listen(config.port, () => {
   console.log(`App listen port ${config.port}`);
