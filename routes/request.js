@@ -18,7 +18,6 @@ const router = Router();
   }); */
 
   router.post('/massive', (req, res) => {
-    const data = req.body; // Validar nombre del arrObj con Maray.
     // TODO - Sanear el Excel (Validar la data segun formato).
     // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
 
@@ -33,11 +32,12 @@ const router = Router();
     // const formatoJson = functionExcel.getExcelJson();
     return collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
-      .then(() => db.insertOne({idUser, fechaVigencia, test, candidatos}))
-      // .then(() => functionEmail.sendMasivoEmail(formatoJson))
+      .then(() => db.insertOne({idUser, fechaVigencia, test, candidatos})
       .then((result) => {
-        res.send(result.ops[0])
-      })
+        res.send(result.ops[0]);
+      }))
+      // .then(() => functionEmail.sendMasivoEmail(formatoJson))
+  
       .catch(err => console.log(err));
   });
 
