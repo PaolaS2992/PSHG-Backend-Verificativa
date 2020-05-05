@@ -9,7 +9,7 @@ router.post('/massive', (req, res) => {
     // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
     let db;
     // const formatoJson = functionExcel.getExcelJson();
-    collection('requestMassive')
+    return collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
       .then(() => db.insertOne(data)) //req.body
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
@@ -19,7 +19,7 @@ router.post('/massive', (req, res) => {
 
   router.get('/massive', (req, res) => {
     let db;
-    collection('requestMassive')
+    return collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
       .then(() => db.find().toArray())
       .then((result) => res.send(result))
