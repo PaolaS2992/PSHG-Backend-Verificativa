@@ -32,7 +32,7 @@ const router = Router();
     // const formatoJson = functionExcel.getExcelJson();
     return collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
-      .then(() => db.insertOne({idUser, fechaVigencia, test, candidatos}))
+      .then(() => db.insertOne({idUser: idUser, fechaVigencia: fechaVigencia, test: test, candidatos: candidatos}))
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
       .then((result) => {
         res.send({
@@ -42,8 +42,7 @@ const router = Router();
           test: result.ops[0].test,
           candidatos: result.ops[0].candidatos
         })
-      })
-      .catch(err => console.log(err));
+      }).catch(err => console.log(err));
   });
 
   router.get('/massive', (req, res) => {
