@@ -26,7 +26,7 @@ const router = Router();
     return collection('requestMassive')
       .then((dbCollection) => dbCollection.insertOne(data))
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
-      .then(() => res.send({ message:'Correos enviados!!!' }))
+      .then((result) => res.send(result.ops[0]))
       .catch(err => console.log(err));
   });
 
