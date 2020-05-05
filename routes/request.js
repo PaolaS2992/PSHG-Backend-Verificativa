@@ -28,13 +28,12 @@ const router = Router();
       candidatos
     } = req.body;
 
-    const objRequest = {
-      idUser,
-      fechaVigencia,
-      test,
-      candidatos
+    const newRequest = {
+      idUser: req.body.idUser,
+      fechaVigencia: req.body.fechaVigencia,
+      test: req.body.test,
+      candidatos: req.body.candidatos
     };
-    console.log(objRequest);
 
     console.log('Soy req, body', req.body);
 
@@ -42,7 +41,7 @@ const router = Router();
     // const formatoJson = functionExcel.getExcelJson();
     return collection('requestMassive')
       .then((dbCollection) => db = dbCollection)
-      .then(() => db.insertOne(objRequest))
+      .then(() => db.insertOne(newRequest))
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
       .then((result) => {
         res.send({
