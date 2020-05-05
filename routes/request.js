@@ -21,12 +21,23 @@ const router = Router();
     const data = req.body; // Validar nombre del arrObj con Maray.
     // TODO - Sanear el Excel (Validar la data segun formato).
     // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
+
+    const {
+      idUser,
+      fechaVigencia,
+      test,
+      candidatos
+    } = req.body;
+
     let db;
     // const formatoJson = functionExcel.getExcelJson();
     return collection('requestMassive')
-      .then((dbCollection) => dbCollection.insertOne(data))
+      .then((dbCollection) => db = dbCollection)
+      .then(() => db.insertOne({idUser, fechaVigencia, test, candidatos}))
       // .then(() => functionEmail.sendMasivoEmail(formatoJson))
-      .then((result) => res.send(result.ops[0]))
+      .then((result) => {
+        res.send(result.ops[0])
+      })
       .catch(err => console.log(err));
   });
 
