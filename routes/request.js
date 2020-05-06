@@ -20,7 +20,6 @@ const router = Router();
   router.post('/massive', (req, res) => {
     // TODO - Sanear el Excel (Validar la data segun formato).
     // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
-
     const {
       idUser,
       fechaVigencia,
