@@ -3,25 +3,42 @@ const collection = require('../connection/collection');
 const functionEmail = require('../lib/libEmail');
 const router = Router();
 
+const saveCandidate = (req) => {
+  // const candidatos = req.candidatos;
+  // startSesion: { estado: true } --> Pedir a Front que lo incluya.
+  return collection('candidates')
+    .then((dbCollection) => dbCollection.insertMany(req))
+    .catch((err) => console.log(err));
+};
+
+const getEmail = (req) => {
+  //const candidatos = req.candidatos;
+  let newArr = [];
+  Object.keys(req).forEach((key) => {
+    newArr.push(req[key].email)
+  });
+  return newArr;
+};
+
 router.post('/massive', (req, res) => {
   // TODO - Sanear el Excel (Validar la data segun formato).
   // TODO - Agregarle el propietario (Relacionar que usuario de la covocatoria).
   const {
     idUser,
-    fechaVigencia,
+    dateValid,
     test,
-    candidatos
+    candidates
   } = req.body;
 
-  if (!idUser || !fechaVigencia || !test || !candidatos){
+  if (!idUser || !dateValid || !test || !candidates){
     return res.status(400).send({ message: 'Ingresar todos los datos' });
   }
 
   const newRequest = {
     idUser: req.body.idUser,
-    fechaVigencia: req.body.fechaVigencia,
+    dateValid: req.body.dateValid,
     test: req.body.test,
-    candidatos: req.body.candidatos
+    candidates: getEmail(candidates)
   };
 
   console.log('Soy req, body', req.body);
@@ -32,6 +49,7 @@ router.post('/massive', (req, res) => {
     .then((dbCollection) => db = dbCollection)
     .then(() => db.insertOne(newRequest))
     .then(() => functionEmail.sendMasivoEmail(newRequest))
+    .then(() => saveCandidate(candidates))
     .then(() => res.send({ message: 'Correos enviados' }))
     .catch(err => console.log(err));
 });
