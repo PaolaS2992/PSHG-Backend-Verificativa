@@ -3,16 +3,15 @@ const collection = require('../connection/collection');
 const functionEmail = require('../lib/libEmail');
 const router = Router();
 
-const saveCandidate = (req) => {
+const saveCandidates = (arrObjCandidates) => {
   // const candidatos = req.candidatos;
-  // startSesion: { estado: true } --> Pedir a Front que lo incluya.
+  // startSesion: { estado: true } --> Pedir a Front que lo incluya. Para Inicio de Sesion del Postulante
   return collection('candidates')
-    .then((dbCollection) => dbCollection.insertMany(req))
+    .then((dbCollection) => dbCollection.insertMany(arrObjCandidates))
     .catch((err) => console.log(err));
 };
 
 const getEmail = (req) => {
-  //const candidatos = req.candidatos;
   let newArr = [];
   Object.keys(req).forEach((key) => {
     newArr.push(req[key].email)
@@ -35,9 +34,10 @@ router.post('/massive', (req, res) => {
   }
 
   const newRequest = {
-    idUser: req.body.idUser,
-    dateValid: req.body.dateValid,
-    test: req.body.test,
+    type: 'massive',
+    idUser,
+    dateValid,
+    test,
     candidates: getEmail(candidates)
   };
 
@@ -45,28 +45,77 @@ router.post('/massive', (req, res) => {
 
   let db;
   // const formatoJson = functionExcel.getExcelJson();
-  return collection('requestMassive')
+  return collection('convocatoria')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.insertOne(newRequest))
-    .then(() => functionEmail.sendMasivoEmail(newRequest))
-    .then(() => saveCandidate(candidates))
+    .then(() => functionEmail.sendMasivoEmail(newRequest.candidates))
+    .then(() => saveCandidates(candidates))
     .then(() => res.send({ message: 'Correos enviados' }))
     .catch(err => console.log(err));
 });
 
-/* res.send({
-        _id: result.ops[0]._id,
-        idUser: result.ops[0].idUser,
-        fechaVigencia: result.ops[0].fechaVigencia,
-        test: result.ops[0].test,
-        candidatos: result.ops[0].candidatos
-      }) */
+const saveCandidate = (obj) => {
+  return collection('candidates')
+    .then((dbCollection) => dbCollection.insertOne(obj))
+    .catch((err) => console.log(err));
+};
+
+router.post('/individual', (req, res) => {
+  const {
+    idUser, dateValid, test,
+    firstName, secondName, firstFullName,
+    secondFullName, tDocuments, nroDocuments,
+    cCost, email
+  } = req.body;
+
+  if (!idUser || !dateValid || !test || 
+      !firstName || !secondName || !firstFullName ||
+      !secondFullName || !tDocuments || !nroDocuments ||
+      !cCost || !email) {
+        return res.status(400).send({ message: 'Ingresar todos los datos' })
+      }
+
+  const objCandidate = {
+    firstName, secondName,
+    firstFullName, secondFullName,
+    tDocuments, nroDocuments,
+    cCost, email,
+    startSesion: { estado: true }
+  }
+
+  const newRequest = {
+    type: 'individual',
+    idUser,
+    dateValid,
+    test,
+    candidate: req.body.email
+  };
+
+  let db;
+
+  return collection('convocatoria')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.insertOne(newRequest))
+    .then(() => functionEmail.sendEmail(email))
+    .then(() => saveCandidate(objCandidate))
+    .then(() => res.send({ message: 'Correo Enviado!!!' }))
+    .catch((err) => console.log(err));
+})
 
 router.get('/massive', (req, res) => {
   let db;
-  return collection('requestMassive')
+  return collection('convocatoria')
     .then((dbCollection) => db = dbCollection)
-    .then(() => db.find().toArray())
+    .then(() => db.find({type: 'massive'}).toArray())
+    .then((result) => res.send(result))
+    .catch((err) => console.log(err));
+});
+
+router.get('/individual', (req, res) => {
+  let db;
+  return collection('convocatoria')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.find({type: 'individual'}).toArray())
     .then((result) => res.send(result))
     .catch((err) => console.log(err));
 });
