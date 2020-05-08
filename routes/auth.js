@@ -6,7 +6,7 @@ const bcrypt = require('bcrypt');
 
 const router = Router();
 
-// auth - login.
+// Auth - login.
 router.post('/auth', (req, res, next) => {
     const { email, password } = req.body;
     if (!email && !password) {
@@ -36,26 +36,22 @@ router.post('/auth', (req, res, next) => {
         }));
 });
 
-/**
- * Auth - Login Postulante.
- * Donde:
- * email: Correo del candidato.
- * password: dni.
- *  */
+// Auth - Login Postulante. 
 router.post('/authPostulante', (req, res) => {
   const { email, password } = req.body;
   if (!email && !password) {
     res.status(400).send({message: 'Ingresar Email y Password'})
   }
   let db;
-  return collection('postulantes')
+  return collection('candidates')
     .then((dbCollection) => db = dbCollection)
-    .then(() => db.findOne({email})
+    .then(() => db.findOne({ email })
       .then((candidate) => {
         if (!candidate) {
           return res.status(400).send({ message: 'No estas registrado' })
         }
-        if (password == candidate.dni) {
+        // Compara pasword.
+        if (bcrypt.compareSync(password, candidate.password)) {
           const payload = {
             uid: candidate._id,
             iss: 'api-verificativa',
