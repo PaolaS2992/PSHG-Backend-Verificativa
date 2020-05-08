@@ -1,3 +1,5 @@
+const bcrypt = require('bcrypt');
+
 // Ejercicio 01: Array de Objetos.
 const arrObj = [
     {
@@ -114,3 +116,38 @@ function getArrEmail3(arrObjTotal){
     return newArrEmail;
 }
 console.log(getArrEmail3(arrObj2));
+
+
+// Ejercicio 04: Agregar propiedades al array de Objetos.
+
+const arrObj3 = [
+    {
+        _id: "5ea6e0e0b407d2140c5956e8",
+        Nombre: "Sonia",
+        Apellidos: "Gonzales",
+        dni: "20035229",
+        email: "huaripayta29.92@gmail.com",
+        fecha: 43926
+    },
+    {
+        _id: "5ea6e0e0b407d2140c5956e9",
+        Nombre: "Eddie",
+        Apellidos: "Huaripayta",
+        dni: "1234567",
+        email: "libra_pshg@hotmail.com",
+        fecha: 43926
+    },
+];
+
+const addProperty = (arrObj) => {
+    let newArray = [];
+    arrObj.map((property) => {
+        const newObj = {... property,
+            startSesion: { estado: true },
+            password: bcrypt.hashSync(property.dni, 10)}
+        newArray.push(newObj);
+    });
+    return newArray;
+};
+
+console.log(addProperty(arrObj3));

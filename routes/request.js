@@ -1,13 +1,26 @@
 const { Router } = require('express');
+const { ObjectId } = require('mongodb');
 const collection = require('../connection/collection');
 const functionEmail = require('../lib/libEmail');
+
 const router = Router();
+const bcrypt = require('bcrypt');
+
+const addProperty =  (arrObj) => {
+  let newArrObj = [];
+  arrObj.map((property) => {
+    const newObj = {... property,
+    startSesion: { estado: true },
+    password: bcrypt.hashSync(property.nroDocuments, 10)};
+    newArrObj.push(newObj);
+  });
+  return newArrObj;
+};
 
 const saveCandidates = (arrObjCandidates) => {
-  // const candidatos = req.candidatos;
-  // startSesion: { estado: true } --> Pedir a Front que lo incluya. Para Inicio de Sesion del Postulante
+  const newArrCandidate = addProperty(arrObjCandidates);
   return collection('candidates')
-    .then((dbCollection) => dbCollection.insertMany(arrObjCandidates))
+    .then((dbCollection) => dbCollection.insertMany(newArrCandidate))
     .catch((err) => console.log(err));
 };
 
@@ -45,7 +58,7 @@ router.post('/massive', (req, res) => {
 
   let db;
   // const formatoJson = functionExcel.getExcelJson();
-  return collection('convocatoria')
+  return collection('request')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.insertOne(newRequest))
     .then(() => functionEmail.sendMasivoEmail(newRequest.candidates))
@@ -80,7 +93,8 @@ router.post('/individual', (req, res) => {
     firstFullName, secondFullName,
     tDocuments, nroDocuments,
     cCost, email,
-    startSesion: { estado: true }
+    startSesion: { estado: true },
+    password: bcrypt.hashSync(nroDocuments, 10)
   }
 
   const newRequest = {
@@ -93,7 +107,7 @@ router.post('/individual', (req, res) => {
 
   let db;
 
-  return collection('convocatoria')
+  return collection('request')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.insertOne(newRequest))
     .then(() => functionEmail.sendEmail(email))
@@ -104,7 +118,7 @@ router.post('/individual', (req, res) => {
 
 router.get('/massive', (req, res) => {
   let db;
-  return collection('convocatoria')
+  return collection('request')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.find({type: 'massive'}).toArray())
     .then((result) => res.send(result))
@@ -113,11 +127,44 @@ router.get('/massive', (req, res) => {
 
 router.get('/individual', (req, res) => {
   let db;
-  return collection('convocatoria')
+  return collection('request')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.find({type: 'individual'}).toArray())
     .then((result) => res.send(result))
     .catch((err) => console.log(err));
+});
+
+router.put('/massive', (req, res) => {
+  const { requestId } = req.params;  
+  let query = new ObjectId(requestId);
+
+  // SOLO, se podra cambiar la fecha de Validez.
+  const { idUser, dateValid, test, candidates } = req.body;
+
+  if (!requestId) {
+    return res.status(400).send({ message: 'No tiene id' });
+  }
+
+  let db;
+  return collection('request')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.findOne({ _id: query }))
+    .then((result) => {
+      if (!result) {
+        return res.status(400).send({message:'No existe convocatoria'})
+      }
+      return collection('request')
+        .then((dbCollection) => db = dbCollection)
+        .then(() => db.updateOne({ _id: query }, {
+          $set: {
+            idUser: idUser || result.idUser,
+            dateValid: dateValid || result.dateValid,
+            test: test || result.test,
+            candidates: candidates || result.candidates
+          }
+        }))
+        .then(() => res.send({ message: 'Convocatoria actualizada' }));
+    }).catch((err) => console.log(err));
 });
 
 module.exports = router;
