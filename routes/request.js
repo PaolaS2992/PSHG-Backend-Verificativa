@@ -137,12 +137,12 @@ router.get('/individual', (req, res) => {
 router.put('/massive/:convocatoriaId', (req, res) => {
   const query = new ObjectId(req.params.convocatoriaId);
 
-  // SOLO, se podra cambiar la fecha de Valides.
-  const { type, idUser, dateValid, test, candidates } = req.body;
-
   if (!query) {
     return res.status(400).send({ message: 'Ingresar Id Convocatoria' });
   }
+
+  // Solo se podra editar la Fecha de Vigencia.
+  const { type, idUser, dateValid, test, candidates } = req.body;
 
   if (!type || !idUser || !dateValid || !test || !candidates){
     return res.status(400).send({ message: 'Faltan datos' });
@@ -154,53 +154,55 @@ router.put('/massive/:convocatoriaId', (req, res) => {
     .then(() => db.findOne({ _id: query }))
     .then((result) => {
       if (!result) {
-        return res.status(400).send({ message:'No existe convocatoria' })
+        return res.status(400).send({ message:'No existe convocatoria masiva' })
       }
       return collection('request')
         .then((dbCollection) => db = dbCollection)
         .then(() => db.updateOne({ _id: query }, {
           $set: {
-            type: type || result.type,
-            idUser: idUser || result.idUser,
-            dateValid: dateValid || result.dateValid, //* Solo este se podrà editar.
-            test: test || result.test,
-            candidates: candidates || result.candidates
+            type: type || result.type,//* Solo lectura.
+            idUser: idUser || result.idUser,//* Se cambia por el usuario que edito (req.header.user).
+            dateValid: dateValid || result.dateValid,//* Se puede editar.
+            test: test || result.test,//* Solo lectura.
+            candidates: candidates || result.candidates//* Solo lectura.
           }
         }))
-        .then(() => res.send({ message: 'Convocatoria Masiva actualizada' }));
+        .then(() => res.send({ message: 'Convocatoria masiva actualizada' }));
     }).catch((err) => console.log(err));
 });
 
 router.put('/individual/:convocatoriaId', (req, res) => {
   const query = new ObjectId(req.params.convocatoriaId);
   if (!query) {
-    return res.status(400).send({ message:'No existe convocatoria' });
+    return res.status(400).send({ message:'Ingresar Id Convocatoria' });
   }
+
   const { type, idUser, dateValid, test, candidate } = req.body;
   if (!type || !idUser || !dateValid || !test || !candidate){
     return res.status(400).send({ message: 'Faltan datos' });
   }
+
   let db;
   return collection('request')
     .then((dbCollection) => db = dbCollection)
     .then(() => db.findOne({ _id: query }))
     .then((result) => {
       if(!result) {
-        return res.status(400).send({ message: 'No existe id' })
+        return res.status(400).send({ message: 'No existe convocatoria individual' })
       }
       return collection('request')
         .then((dbCollection) => db = dbCollection)
         .then(() => db.updateOne({ _id: query }, {
           $set: {
-            type: type || result.type,
-            idUser: idUser || result.idUser,
-            dateValid: dateValid || result.dateValid,
-            test: test || result.test,
-            candidate: candidate || result.candidate
+            type: type || result.type,//* Solo lectura.
+            idUser: idUser || result.idUser,//* Se cambia por el usuario que edito (req.header.user).
+            dateValid: dateValid || result.dateValid,//* Se puede editar.
+            test: test || result.test,//* Solo lectura.
+            candidate: candidate || result.candidate//* Solo lectura.
           }
         }))
         .then(() => res.send({ message: 'Convocatoria individual Actualizada' }))
-    }).catch((err) => console.log(errç) );
+    }).catch((err) => console.log(err) );
 });
 
 module.exports = router;
