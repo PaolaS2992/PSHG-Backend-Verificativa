@@ -205,4 +205,45 @@ router.put('/individual/:convocatoriaId', (req, res) => {
     }).catch((err) => console.log(err) );
 });
 
+router.delete('/massive/:convocatoriaId', (req, res) => {
+  let query = new ObjectId(req.params.convocatoriaId);
+  if (!query) {
+    return res.status(400).send({ message:'Ingresar Id Convocatoria' });
+  }
+  let db;
+  return collection('request')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.findOne({ _id: query }))
+    .then((result) => {
+      if (!result) {
+        return res.status(400).send({ message: 'No existe convocatoria masiva' });
+      }
+      return collection('request')
+        .then((dbCollection) => db = dbCollection)
+        .then(() => db.deleteOne({ _id: query }))
+        .then(() => res.send({ message: 'Convocatoria masiva eliminada' }));
+    }).catch((err) => console.log(err));
+});
+
+router.delete('/individual/:convocatoriaId', (req, res) => {
+  let query = new ObjectId(req.params.convocatoriaId);
+  if (!query) {
+    return res.status(400).send({ message: 'Ingresar Id Convocatoria' });
+  }
+
+  let db;
+  return collection('request')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.findOne({ _id: query }))
+    .then((result) => {
+      if (!result) {
+        return res.status(400).send({ message: 'No existe convocatoria individual'});
+      }
+      return collection('request')
+        .then((dbCollection) => db = dbCollection)
+        .then(() => db.deleteOne({ _id: query }))
+        .then(() => res.send({ message: 'Convocatoria individual eliminada' }))
+    }).catch((err) => console.log(err));
+});
+
 module.exports = router;
