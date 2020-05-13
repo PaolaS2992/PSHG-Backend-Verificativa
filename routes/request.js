@@ -165,6 +165,25 @@ router.get('/individual', (req, res) => {
     }).catch((err) => console.log(err));
 });
 
+// * Solo una funcion porque, se busca en una sola coleccion.
+router.get('/request/:convocatoriaId', (req, res) => {
+  let query = new ObjectId(req.params.convocatoriaId);
+  if (!query) {
+    return res.status(400).send({ message: 'Ingresar Id Convocatoria' });
+  }
+
+  let db;
+  return collection('request')
+    .then((dbCollection) => db = dbCollection)
+    .then(() => db.findOne({ _id: query }))
+    .then((result) => {
+      if (!result) {
+        return res.status(400).send({ message: 'No existe convocatoria masiva' });
+      }
+      return res.send(result);
+    }).catch((err) => console.log(err));
+});
+
 router.put('/massive/:convocatoriaId', (req, res) => {
   const query = new ObjectId(req.params.convocatoriaId);
 
