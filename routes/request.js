@@ -2,6 +2,7 @@ const { Router } = require('express');
 const { ObjectId } = require('mongodb');
 const collection = require('../connection/collection');
 const functionEmail = require('../lib/libEmail');
+const functionUtils = require('../utils/utils');
 
 const router = Router();
 const bcrypt = require('bcrypt');
@@ -117,21 +118,51 @@ router.post('/individual', (req, res) => {
 })
 
 router.get('/massive', (req, res) => {
+  const { protocol, path} = req;
+  const url = `${protocol}://${req.get('host')}${path}`;
+
+  const { limit, page } = req.query;
+  const reqLimit = parseInt(limit, 10) || 10;
+  const reqPage = parseInt(page, 10) || 1;
+  
   let db;
   return collection('request')
     .then((dbCollection) => db = dbCollection)
-    .then(() => db.find({type: 'massive'}).toArray())
-    .then((result) => res.send(result))
-    .catch((err) => console.log(err));
+    .then(() => db.countDocuments())
+    .then((quantity) => {
+      const numbersPages = Math.ceil(quantity / reqLimit);
+      const skip = (reqLimit * reqPage) - reqLimit;
+      return collection('request')
+        .then((dbCollection) => db = dbCollection)
+        .then(() => db.find({ type: 'massive' }).skip(skip).limit(reqLimit).toArray())
+        .then((result) => {
+          return res.set('link', functionUtils.getPagination(url, reqPage, reqLimit, numbersPages)).send(result);
+        })
+    }).catch((err) => console.log(err));
 });
 
 router.get('/individual', (req, res) => {
+  const { protocol, path } = req;
+  const url = `${protocol}://${req.get('host')}${path}`;
+
+  const { limit, page } = req.query;
+  const reqLimit = parseInt(limit, 10) || 10;
+  const reqPage = parseInt(page, 10) || 1;
+  
   let db;
   return collection('request')
     .then((dbCollection) => db = dbCollection)
-    .then(() => db.find({type: 'individual'}).toArray())
-    .then((result) => res.send(result))
-    .catch((err) => console.log(err));
+    .then(() => db.countDocuments())
+    .then((quantity) => {
+      const numbersPages = Math.ceil(quantity / reqLimit);
+      const skip = (reqLimit * reqPage) - reqLimit;
+      return collection('request')
+        .then((dbCollection) => db = dbCollection)
+        .then(() => db.find({ type: 'individual' }).skip(skip).limit(reqLimit).toArray())
+        .then((result) => {
+          return res.set('link', functionUtils.getPagination(url, reqPage, reqLimit, numbersPages)).send(result);
+        })
+    }).catch((err) => console.log(err));
 });
 
 router.put('/massive/:convocatoriaId', (req, res) => {

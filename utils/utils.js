@@ -3,8 +3,17 @@ const validateEmail = (email) => {
   return regex.test(String(email).toLowerCase());
 };
 
+const getPagination = (url, page, limit, numbersPages) => {
+  const firstpage = `<${url}?limit=${limit}&page=${1}>; rel="first"`;
+  const prevPage = `<${url}?limit=${limit}&page=${page - 1}>; rel="prev"`;
+  const nextPage = `<${url}?limit=${limit}&page=${page + 1}>; rel="next"`;
+  const lastPage = `<${url}?limit=${limit}&page=${numbersPages}>; rel="last"`;
+  return `${firstpage}, ${prevPage}, ${nextPage}, ${lastPage}`;
+};
+
 const functionUtils = {
-  validateEmail
+  validateEmail,
+  getPagination
 };
 
 module.exports = functionUtils;
